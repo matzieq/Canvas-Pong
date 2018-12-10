@@ -19,7 +19,13 @@ var ballSpeedX = 10;
 var ballSpeedY = 5;
 
 var paddle1Y = 250;
+var paddle2Y = 250;
+
+var player1Score = 0;
+var player2Score = 0;
+
 const PADDLE_HEIGHT = 100;
+const PADDLE_THICKNESS = 10;
 
 function calculateMousePos (event) {
   var rect = canvas.getBoundingClientRect();
@@ -46,23 +52,38 @@ window.onload = function () {
   document.addEventListener('mousemove', function (event) {
     var mousePos = calculateMousePos(event);
     paddle1Y = mousePos.y - PADDLE_HEIGHT / 2;
+//     paddle2Y = mousePos.y - PADDLE_HEIGHT / 2;
   });
 }
 
+function moveComputer () {
+  var paddle2Center = paddle2Y + (PADDLE_HEIGHT / 2);
+  if (paddle2Center < ballY - 35) {
+    paddle2Y += 6;
+  } else if (paddle2Center > ballY + 35) {
+    paddle2Y -= 6;
+  }
+}
+
 function moveEverything () {
+  moveComputer();
   ballX += ballSpeedX;
   ballY += ballSpeedY;
   if (ballX > canvas.width) {
-    ballSpeedX = -ballSpeedX;
-    
+    if (ballY > paddle2Y && ballY < paddle2Y + PADDLE_HEIGHT) {
+      ballSpeedX = -ballSpeedX;
+    } else {
+      player1Score++;
+      resetBall();
+    }
   }
   if (ballX < 0) {
     if (ballY > paddle1Y && ballY < paddle1Y + PADDLE_HEIGHT) {
       ballSpeedX = -ballSpeedX;
     } else {
+      player2Score++;
       resetBall();
     }
-//     ballSpeedX = -ballSpeedX;
   }
   if (ballY > canvas.height) {
     ballSpeedY = -ballSpeedY;
@@ -75,12 +96,16 @@ function moveEverything () {
 function resetBall () {
   ballX = canvas.width / 2;
   ballY = canvas.height / 2;
+  ballSpeedX = -ballSpeedX;
 }
 
 function drawEverything () {
   colorRect(0, 0, canvas.width, canvas.height, 'black');
-  colorRect(0, paddle1Y, 10, PADDLE_HEIGHT, 'white');
+  colorRect(0, paddle1Y, PADDLE_THICKNESS, PADDLE_HEIGHT, 'white');
+  colorRect(canvas.width - PADDLE_THICKNESS, paddle2Y, PADDLE_THICKNESS, PADDLE_HEIGHT, 'white');
   colorCircle(ballX, ballY, 10, 'white');
+  canvasContext.fillText(player1Score, 100, 100);
+  canvasContext.fillText(player2Score, 700, 100);
 }
 
 function colorRect (x, y, width, height, drawColor) {
